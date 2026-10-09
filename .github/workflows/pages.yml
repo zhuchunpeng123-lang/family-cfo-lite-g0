@@ -1,4 +1,4 @@
-name: Test and deploy G0 to GitHub Pages
+name: Test and deploy Family CFO Lite to GitHub Pages
 
 on:
   push:

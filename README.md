@@ -1,56 +1,66 @@
-# Family CFO Lite Web — G0
+# Family CFO Lite Web — G1 Candidate
 
-独立的 iPhone Web 技术验证工程。当前只覆盖虚构支出/收入记账、本机 IndexedDB 保存与读回、手动 JSON 备份和全量恢复。它不是生产记账产品，也不应存入真实财务数据。
+个人自用优先的 iPhone Web 记账工具。G1 聚焦三件事：快速记账、账本修改、月度统计。资产、FIRE、预算、账号和云同步不在当前范围。
 
-## 本地开发
+## 产品主路径
+
+- 底部 `+` 进入记账。
+- 默认支出；常用分类优先展示。
+- 分类可跳过，直接记金额；之后可从账本补分类、日期和备注。
+- 选分类后在当前页面底部打开半屏金额键盘，不跳转到新页面。
+- 键盘支持 `+ / -` 简单计算，日期默认今天并直接调用系统日期选择器。
+- `记入` 是单笔唯一提交动作；成功后半屏收起，仍停留在分类页，方便连续记账。
+- 主导航只有 `账本 | + | 统计`。
+
+## G0 数据兼容
+
+- IndexedDB 名称继续使用 `family-cfo-lite-g0`。
+- 数据库由 v1 加法升级到 v2：原 `records` store 不删除、不重建；只新增 `settings` store。
+- `LedgerRecord` 结构保持 G0 不变：金额继续使用整数分，`category` 继续允许 `null`。
+- G1 备份格式升级到 schemaVersion 2，增加自定义分类和大字模式设置；仍接受 G0 schemaVersion 1 备份。
+- G0 v1 数据库升级测试必须通过后才能发布。
+
+## 开发
 
 要求 Node.js `>=22 <25`、npm `>=10 <12`。
 
 ```powershell
 npm ci
+npm test
 npm run dev
 ```
 
-Vite 默认地址为 `http://localhost:5173`。本机没有 TLS 时该地址仅用于 Windows 开发。Founder iPhone HTTPS 验收地址为 `https://zhuchunpeng123-lang.github.io/family-cfo-lite-g0/`。
-
-## 构建与自动化测试
+生产构建：
 
 ```powershell
-npm test
 npm run build
-npm run preview
 ```
 
-测试使用 Node 内置测试运行器和 `fake-indexeddb`，覆盖金额解析、日历日、备份格式和坏记录校验、数据库重新打开读回、全量替换及重复 ID 导致的事务回滚。桌面浏览器或 fake IndexedDB 的结果不能替代 Founder 的真实 iPhone Safari / 主屏幕 Web App / 文件分享验收。
+GitHub Pages 地址继续使用：
 
-## 数据和隐私
+`https://zhuchunpeng123-lang.github.io/family-cfo-lite-g0/`
 
-- 记录只写入浏览器 IndexedDB；应用没有服务器 API、遥测或第三方脚本。
-- 金额以整数分保存。保存成功提示在 IndexedDB 事务完成后出现。
-- 导入先解析并验证整个 JSON；有现存记录时提示先备份并确认全量替换。替换通过单个 IndexedDB 事务执行。
-- 导出优先使用支持文件分享的系统分享面板；否则使用浏览器 JSON 下载。必须在目标 iPhone 上确认文件确实保存到「文件」，本地自动化无法证明此点。
-- Safari 标签页和主屏幕 Web App 可能拥有不同站点存储上下文，必须分别在真实设备验证；不保证数据继承。
-- 页面会请求浏览器持久存储，并显示结果，但浏览器仍可能清理站点数据。定期导出备份。
-- **离线功能未实现、未验证。**
+不要更换路径或 Web App 身份；已添加到 iPhone 主屏幕的入口应继续打开同一地址。
 
-## G0 HTTPS 测试发布
+## 版本更新
 
-静态构建输出在 `dist/`，构建路径固定为 GitHub Pages 项目站点 `/family-cfo-lite-g0/`。GitHub Actions 会在 `main` 更新时先运行自动化测试和生产构建，再发布到 GitHub Pages。预期地址：`https://zhuchunpeng123-lang.github.io/family-cfo-lite-g0/`。
+`public/version.json` 提供远端版本。应用启动和从后台恢复时使用 `cache: no-store` 检查版本；发现更高版本时显示应用内更新提示。当前没有 Service Worker，不引入离线缓存复杂度。
 
-该 Pages 网站公开可访问；G0 只使用虚构数据，发布内容不包含财务记录、备份文件或凭证。GitHub Pages 项目站点按路径与同账号其他 `github.io` 项目区分页面，但这些路径属于同一个浏览器 origin；应用使用独立 IndexedDB 数据库名。不要在此 G0 测试中输入真实财务数据。
+## Founder iPhone 验收
 
-## Founder iPhone 验收步骤
+发布前自动化测试和构建必须通过；发布后至少验证：
 
-使用虚构数据，在最终 HTTPS 链接上分别测试 Safari 标签页和添加到主屏幕后的 Web App：
+1. `+ -> 餐饮 -> 42 -> 记入`。
+2. 连续记录餐饮 42、交通 18。
+3. 直接记金额 18，再从账本补成“买菜”。
+4. `58 + 12` 记入为 70。
+5. 日期选择昨天。
+6. 新增“咖啡”自定义分类并立即记账。
+7. 修改、删除后统计同步。
+8. G0 已有记录升级到 G1 后仍在。
+9. G0 schemaVersion 1 备份可恢复。
+10. 原有主屏幕图标直接打开 G1，不需要新增第二个图标。
+11. 大字模式仍可完成普通支出。
+12. iPhone「文件」导出与恢复实测通过。
 
-1. 打开页面，确认单屏布局无横向滚动。
-2. 选择支出分类，录入 `42` 并保存；确认列表只新增一笔 `¥42.00`。
-3. 不选分类，录入 `18`，输入可选备注，通过「昨天」保存；核对未分类和日历日期。
-4. 日期面板中选择日期后应自动关闭；「更多信息」可由完成键或遮罩关闭，输入保持不变。
-5. 关闭并重开 Safari 标签页，确认记录仍可读。
-6. 添加到主屏幕并作为 Web App 打开，单独记录其数据是否与 Safari 共享。
-7. 从两个目标使用模式分别导出 JSON，并在 iPhone「文件」中确认文件可找到、可再次选取。
-8. 先备份，再确认清空虚构记录；导入有效 JSON，核对笔数、ID、金额、类别、日期、备注。
-9. 尝试导入损坏 JSON、未知版本和非法记录，确认报错且原账本未变。
-
-未收到这些真实 iPhone 证据前，G0 Founder Gate 保持 `PENDING`。
+真实 iPhone 通过前不得声称 G1 Founder PASS。
