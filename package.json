@@ -1,0 +1,22 @@
+{
+  "name": "family-cfo-lite-g0",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22 <25",
+    "npm": ">=10 <12"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --experimental-strip-types --import fake-indexeddb/auto --test tests/*.test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.4",
+    "typescript": "~5.9.3",
+    "vite": "~7.1.12"
+  }
+}

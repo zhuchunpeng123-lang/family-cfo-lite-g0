@@ -1,0 +1,81 @@
+import type { LedgerRecord } from './domain';
+
+const DB_NAME = 'family-cfo-lite-g0';
+const STORE = 'records';
+
+function requestResult<T>(request: IDBRequest<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error('IndexedDB 操作失败'));
+  });
+}
+
+export function openDatabase(): Promise<IDBDatabase> {
+  if (!globalThis.indexedDB) return Promise.reject(new Error('此浏览器不支持 IndexedDB'));
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(STORE, { keyPath: 'id' });
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error('无法打开本机数据库'));
+    request.onblocked = () => reject(new Error('数据库正在被其他页面占用，请关闭重复页面后重试'));
+  });
+}
+
+function transactionDone(transaction: IDBTransaction): Promise<void> {
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onabort = () => reject(transaction.error ?? new Error('本机数据库事务已取消'));
+    transaction.onerror = () => reject(transaction.error ?? new Error('本机数据库事务失败'));
+  });
+}
+
+export async function readRecords(): Promise<LedgerRecord[]> {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(STORE, 'readonly');
+    const done = transactionDone(tx);
+    const result = await requestResult(tx.objectStore(STORE).getAll()) as LedgerRecord[];
+    await done;
+    return result.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id));
+  } finally { db.close(); }
+}
+
+export async function saveRecord(record: LedgerRecord): Promise<void> {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(STORE, 'readwrite');
+    const done = transactionDone(tx);
+    tx.objectStore(STORE).add(record);
+    await done;
+  } finally { db.close(); }
+}
+
+export async function replaceRecords(records: LedgerRecord[]): Promise<void> {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(STORE, 'readwrite');
+    const done = transactionDone(tx);
+    const store = tx.objectStore(STORE);
+    store.clear();
+    for (const record of records) store.add(record);
+    await done;
+  } finally { db.close(); }
+}
+
+export async function clearRecords(): Promise<void> {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(STORE, 'readwrite');
+    const done = transactionDone(tx);
+    tx.objectStore(STORE).clear();
+    await done;
+  } finally { db.close(); }
+}
+
+export async function storagePersistenceStatus(): Promise<'persisted' | 'granted' | 'not-granted' | 'unavailable'> {
+  if (!navigator.storage?.persisted || !navigator.storage?.persist) return 'unavailable';
+  try {
+    if (await navigator.storage.persisted()) return 'persisted';
+    return await navigator.storage.persist() ? 'granted' : 'not-granted';
+  } catch { return 'not-granted'; }
+}
