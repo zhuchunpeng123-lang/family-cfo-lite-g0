@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Vite 默认地址为 `http://localhost:5173`。本机没有 TLS 时该地址仅用于 Windows 开发；iPhone HTTPS 验收链接尚未发布。
+Vite 默认地址为 `http://localhost:5173`。本机没有 TLS 时该地址仅用于 Windows 开发。Founder iPhone HTTPS 验收地址为 `https://zhuchunpeng123-lang.github.io/family-cfo-lite-g0/`。
 
 ## 构建与自动化测试
 
