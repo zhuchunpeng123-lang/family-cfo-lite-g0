@@ -35,7 +35,9 @@ npm run preview
 
 ## G0 HTTPS 测试发布
 
-静态构建输出在 `dist/`，可部署到任意 HTTPS 静态站点。当前没有 Founder 授权的托管账户、域名或发布渠道；不要运行会公开发布的部署命令。取得授权后，选择固定 HTTPS 源站并把真实 URL 写入 Founder 测试记录，再按下方步骤验收。
+静态构建输出在 `dist/`，构建路径固定为 GitHub Pages 项目站点 `/family-cfo-lite-g0/`。GitHub Actions 会在 `main` 更新时先运行自动化测试和生产构建，再发布到 GitHub Pages。预期地址：`https://zhuchunpeng123-lang.github.io/family-cfo-lite-g0/`。
+
+该 Pages 网站公开可访问；G0 只使用虚构数据，发布内容不包含财务记录、备份文件或凭证。GitHub Pages 项目站点按路径与同账号其他 `github.io` 项目区分页面，但这些路径属于同一个浏览器 origin；应用使用独立 IndexedDB 数据库名。不要在此 G0 测试中输入真实财务数据。
 
 ## Founder iPhone 验收步骤
 

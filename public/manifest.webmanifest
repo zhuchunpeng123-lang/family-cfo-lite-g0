@@ -1,12 +1,12 @@
 {
-  "id": "/",
+  "id": "./",
   "name": "Family CFO Lite G0",
   "short_name": "记一笔",
   "description": "本机记账与手动备份技术验证",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f7faf8",
   "theme_color": "#f7faf8",
-  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
 }

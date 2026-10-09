@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build --base=/family-cfo-lite-g0/",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --experimental-strip-types --import fake-indexeddb/auto --test tests/*.test.js"
   },
